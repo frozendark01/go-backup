@@ -9,6 +9,17 @@ This application provides a robust backup solution with the following features:
 - Detailed backup history and reporting
 - Responsive design for both desktop and mobile devices
 
+```bash
+# Pentru suport CIFS/SMB
+sudo apt install cifs-utils
+
+# Pentru suport NFS
+sudo apt install nfs-common
+
+# Pentru rsync
+sudo apt install rsync
+```
+
 ## Installation
 
 ### Prerequisites
@@ -20,6 +31,8 @@ This application provides a robust backup solution with the following features:
 ### Step 1: Install dependencies
 
 ```bash
+go mod init go-backup
+
 # Install Go dependencies
 go get github.com/gorilla/mux
 go get github.com/go-co-op/gocron
