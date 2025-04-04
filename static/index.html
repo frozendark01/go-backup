@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go Backup App</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1><i class="fas fa-sync-alt"></i> Go Backup App</h1>
+            <nav class="main-nav">
+                <button class="nav-toggle" id="navToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <ul id="navMenu">
+                    <li><a href="#" class="nav-item active" data-view="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                    <li><a href="#" class="nav-item" data-view="configs"><i class="fas fa-cogs"></i> Backup Configurations</a></li>
+                    <li><a href="#" class="nav-item" data-view="results"><i class="fas fa-history"></i> Backup History</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main class="app-content">
+            <!-- Dashboard View -->
+            <section id="dashboard" class="view active">
+                <h2>Dashboard</h2>
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Backup Configurations</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="big-number" id="configCount">0</p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="#" data-view="configs" class="btn">Manage Configurations</a>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Completed Backups</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="big-number" id="backupCount">0</p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="#" data-view="results" class="btn">View History</a>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Next Scheduled Backup</h3>
+                        </div>
+                        <div class="card-body">
+                            <p id="nextBackup">None scheduled</p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="#" data-view="configs" class="btn">Schedule Backup</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-backups">
+                    <h3>Recent Backups</h3>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Backup Name</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Files</th>
+                                    <th>Size</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentBackupsTable">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Configurations View -->
+            <section id="configs" class="view">
+                <div class="section-header">
+                    <h2>Backup Configurations</h2>
+                    <button id="newConfigBtn" class="btn primary"><i class="fas fa-plus"></i> New Configuration</button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Sources</th>
+                                <th>Destination</th>
+                                <th>Protocol</th>
+                                <th>Schedule</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="configsTable">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Results View -->
+            <section id="results" class="view">
+                <h2>Backup History</h2>
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label for="configFilter">Configuration:</label>
+                        <select id="configFilter">
+                            <option value="">All Configurations</option>
+                            <!-- Populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="statusFilter">Status:</label>
+                        <select id="statusFilter">
+                            <option value="">All</option>
+                            <option value="success">Success</option>
+                            <option value="failure">Failure</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Configuration</th>
+                                <th>Start Time</th>
+                                <th>Duration</th>
+                                <th>Status</th>
+                                <th>Files</th>
+                                <th>Size</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTable">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for Configuration Form -->
+    <div id="configModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">New Backup Configuration</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="configForm">
+                    <input type="hidden" id="configId">
+                    
+                    <div class="form-group">
+                        <label for="configName">Name:</label>
+                        <input type="text" id="configName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="sourcePaths">Source Paths:</label>
+                        <div id="sourcePathsContainer">
+                            <div class="source-path-row">
+                                <input type="text" class="source-path" required>
+                                <button type="button" class="btn small remove-source"><i class="fas fa-minus"></i></button>
+                            </div>
+                        </div>
+                        <button type="button" id="addSourceBtn" class="btn small"><i class="fas fa-plus"></i> Add Source</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="protocol">Protocol:</label>
+                        <select id="protocol" required>
+                            <option value="local">Local</option>
+                            <option value="cifs">CIFS</option>
+                            <option value="nfs">NFS</option>
+                            <option value="smb">SMB</option>
+                        </select>
+                    </div>
+                    
+                    <div id="protocolSettings">
+                        <div class="form-group">
+                            <label for="destPath">Destination Path:</label>
+                            <input type="text" id="destPath" required>
+                        </div>
+                        
+                        <div class="protocol-auth">
+                            <div class="form-group">
+                                <label for="username">Username:</label>
+                                <input type="text" id="username">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="password">Password:</label>
+                                <input type="password" id="password">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="domain">Domain (optional):</label>
+                                <input type="text" id="domain">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="scheduleEnabled">
+                            Enable Schedule
+                        </label>
+                    </div>
+                    
+                    <div id="scheduleSettings">
+                        <div class="form-group">
+                            <label>Days of Week:</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="day-checkbox" value="Monday">
+                                    Mon
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="day-checkbox" value="Tuesday">
+                                    Tue
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="day-checkbox" value="Wednesday">
+                                    Wed
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="day-checkbox" value="Thursday">
+                                    Thu
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="day-checkbox" value="Friday">
+                                    Fri
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="day-checkbox" value="Saturday">
+                                    Sat
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="day-checkbox" value="Sunday">
+                                    Sun
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group time-picker">
+                            <label for="scheduleHour">Time:</label>
+                            <select id="scheduleHour">
+                                <!-- Populated by JavaScript -->
+                            </select>
+                            <span>:</span>
+                            <select id="scheduleMinute">
+                                <!-- Populated by JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <button type="submit" class="btn primary">Save Configuration</button>
+                        <button type="button" class="btn cancel-modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Backup Result Details -->
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="resultModalTitle">Backup Details</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="resultModalBody">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
